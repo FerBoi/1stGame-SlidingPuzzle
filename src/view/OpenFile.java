@@ -108,7 +108,8 @@ public class OpenFile extends javax.swing.JDialog {
         JFileChooser fileChooser = new JFileChooser(".");
         
         fileChooser.setAcceptAllFileFilterUsed(false);
-        fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("*.jpg* *.png* *.jpeg", "jpg", "png", ".jpeg"));
+        fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("JPEG (*.jpg, *jpeg)", "jpg", "jpeg"));
+        fileChooser.addChoosableFileFilter(new FileNameExtensionFilter("PNG (*.png)", "png"));
         
         int returnValue = fileChooser.showOpenDialog(this);
         
