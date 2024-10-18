@@ -11,13 +11,18 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.TimerTask;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import java.util.Timer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  *
@@ -28,12 +33,11 @@ public class MainWindow extends javax.swing.JFrame {
     private int seconds;
     private boolean timerPause;
     private int totalMovsDone;
-
+    
     /** Creates new form MainWindow */
     public MainWindow() {
         initComponents(); 
         
-        this.timer = new Timer();
         this.setIconImage(new ImageIcon(this.getClass().getResource("/src/programIcon.png")).getImage());
         this.createOptions();
     }
@@ -56,6 +60,7 @@ public class MainWindow extends javax.swing.JFrame {
         movements = new javax.swing.JLabel();
         movementsLabel = new javax.swing.JLabel();
         previewImg = new javax.swing.JLabel();
+        saveBtn = new javax.swing.JButton();
         leftPanel = new javax.swing.JPanel();
         instructionsPanel = new javax.swing.JPanel();
         labelUp = new javax.swing.JLabel();
@@ -97,36 +102,55 @@ public class MainWindow extends javax.swing.JFrame {
 
         movementsLabel.setText("0");
 
+        previewImg.setToolTipText("Click to maximize");
+        previewImg.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                previewImgMouseReleased(evt);
+            }
+        });
+
+        saveBtn.setText("SAVE");
+        saveBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveBtnActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout northPanelLayout = new javax.swing.GroupLayout(northPanel);
         northPanel.setLayout(northPanelLayout);
         northPanelLayout.setHorizontalGroup(
             northPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(northPanelLayout.createSequentialGroup()
-                .addGap(35, 35, 35)
+                .addContainerGap(38, Short.MAX_VALUE)
                 .addComponent(time)
                 .addGap(18, 18, 18)
                 .addComponent(timeLabel)
-                .addGap(55, 55, 55)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 55, Short.MAX_VALUE)
                 .addComponent(movements)
                 .addGap(18, 18, 18)
                 .addComponent(movementsLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 237, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 134, Short.MAX_VALUE)
                 .addComponent(previewImg, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(136, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 101, Short.MAX_VALUE)
+                .addComponent(saveBtn)
+                .addContainerGap(63, Short.MAX_VALUE))
         );
         northPanelLayout.setVerticalGroup(
             northPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(northPanelLayout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(northPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(time)
-                    .addComponent(timeLabel)
-                    .addComponent(movements)
-                    .addComponent(movementsLabel))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-            .addGroup(northPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(previewImg, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(northPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(northPanelLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(previewImg, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(northPanelLayout.createSequentialGroup()
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(northPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(northPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(time)
+                                .addComponent(timeLabel)
+                                .addComponent(movements)
+                                .addComponent(movementsLabel))
+                            .addComponent(saveBtn))))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -352,7 +376,6 @@ public class MainWindow extends javax.swing.JFrame {
                                 JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE) == JOptionPane.YES_OPTION) {
                             this.puzzlePanel.reset();
                             this.seconds = 0;
-                            this.timer = new Timer();
                             this.createTimerTask();
                         }
                     } else
@@ -373,6 +396,52 @@ public class MainWindow extends javax.swing.JFrame {
         this.updatePanel(this.gameOptionPanel);
     }//GEN-LAST:event_backBtnActionPerformed
 
+    private void saveBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveBtnActionPerformed
+        this.timerPause = true;
+        int answer = JOptionPane.showConfirmDialog(this, "This will save your progress and exit the current game. Do you agree?", "SAVING GAME", 
+                JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+        
+        if(answer == JOptionPane.YES_OPTION) {
+            JFileChooser saveCurrentGame = new JFileChooser(".");
+            saveCurrentGame.setDialogTitle("Save current game");
+            
+            int userSelection = saveCurrentGame.showSaveDialog(this);
+            
+            if(userSelection == JFileChooser.APPROVE_OPTION) {
+                try {
+                    File fileToWrite = saveCurrentGame.getSelectedFile();
+                    
+                    if (!fileToWrite.getName().endsWith(".sli"))
+                        fileToWrite = new File(fileToWrite.getAbsolutePath() + ".sli");
+                    
+                    fileToWrite.createNewFile();
+                    int[] otherData = {this.seconds, this.totalMovsDone, this.puzzlePanel.getCurrentRow(), this.puzzlePanel.getCurrentColumn()};
+                    
+                    boolean saved = SliWriter.writeSliFile(otherData, this.puzzlePanel.getMatrix(), this.puzzlePanel.getOriginalMatrix(),
+                            fileToWrite);
+                    
+                    if(saved) {
+                        JOptionPane.showConfirmDialog(this, "Game saved!", "SUCCESS", JOptionPane.DEFAULT_OPTION,
+                                JOptionPane.INFORMATION_MESSAGE);
+                        this.updatePanel(this.gameOptionPanel);
+                    } else {
+                        JOptionPane.showConfirmDialog(this, "There was an error saving the game status", "ERROR", 
+                                JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
+                        this.timerPause = false;
+                    }
+                } catch (IOException ex) {
+                    Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } else
+                this.timerPause = false;
+        } else
+            this.timerPause = false;
+    }//GEN-LAST:event_saveBtnActionPerformed
+
+    private void previewImgMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_previewImgMouseReleased
+        // TODO a
+    }//GEN-LAST:event_previewImgMouseReleased
+
     private void updatePanel(JPanel newPanel) {
         this.cardPanel.removeAll();
         this.cardPanel.add(newPanel);
@@ -387,7 +456,7 @@ public class MainWindow extends javax.swing.JFrame {
         gbc.insets = new Insets(20, 0, 20, 0); // Espacio dinámico entre los botones
         gbc.gridx = 0;
 
-        JButton[] btns = new JButton[] {new JButton("NEW GAME"), new JButton("INSTRUCTIONS"), new JButton("EXIT")};
+        JButton[] btns = new JButton[] {new JButton("NEW GAME"), new JButton("CONTINUE"), new JButton("INSTRUCTIONS"), new JButton("EXIT")};
 
         for (int i = 0; i < btns.length; i++) {
             btns[i].setMinimumSize(new Dimension(120, 30));
@@ -398,15 +467,38 @@ public class MainWindow extends javax.swing.JFrame {
             final int forLambda = i;
             
             btns[i].addActionListener(e -> {
-                if (forLambda == 0) {
-                    OpenFile jDialogOpenFile = new OpenFile(this, true);
-
-                    jDialogOpenFile.setLocationRelativeTo(null);
-                    jDialogOpenFile.setVisible(true);
-                } else if (forLambda == 1)
-                    this.updatePanel(this.instructsPanel);
-                else
-                    System.exit(0);
+                switch (forLambda) {
+                    case 0 -> {
+                        OpenFile jDialogOpenFile = new OpenFile(this, true);
+                        jDialogOpenFile.setLocationRelativeTo(null);
+                        jDialogOpenFile.setVisible(true);
+                    } 
+                    case 1 -> {
+                        JFileChooser openSli = new JFileChooser(".");
+                        openSli.setAcceptAllFileFilterUsed(false);
+                        openSli.setFileFilter(new FileNameExtensionFilter("Sliding Puzzle (*.sli)", "sli"));
+                        int returnValue = openSli.showOpenDialog(this);
+                        
+                        if(returnValue == JFileChooser.APPROVE_OPTION) {
+                            Object[] data = SliReader.readFile(openSli.getSelectedFile());
+                            
+                            if(data != null) {
+                                this.seconds = (int) data[0];
+                                this.totalMovsDone = (int) data[1];
+                                BufferedImage puzzleImg = this.puzzlePanel.createPuzzle((int) data[2], (int) data[3], (int[][]) data[4], (int[][]) data[5]);
+                                
+                                this.movementsLabel.setText(this.totalMovsDone + "");
+                                
+                                if(this.timer != null)
+                                    this.timer.cancel();
+                                
+                                this.createPuzzle(puzzleImg, true);
+                            }
+                        }
+                    }
+                    case 2 -> this.updatePanel(this.instructsPanel);
+                    case 3 -> System.exit(0);
+                }
             });
             
             this.gameOptionPanel.add(btns[i], gbc);
@@ -414,6 +506,8 @@ public class MainWindow extends javax.swing.JFrame {
     }
     
     private void createTimerTask() {
+        this.timer = new Timer();
+        
         this.timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
@@ -431,16 +525,17 @@ public class MainWindow extends javax.swing.JFrame {
                 }
             }
         }, 0, 1000);
+        
+        this.timerPause = false;
     }
     
-    public void createPuzzle(File imgFile, Image puzzleImg, BufferedImage selectedImg) {
-        this.puzzlePanel.createPuzzle(selectedImg);
-        puzzleImg = puzzleImg.getScaledInstance(this.previewImg.getWidth(),
-                this.previewImg.getHeight(), Image.SCALE_SMOOTH);
+    public void createPuzzle(BufferedImage selectedImg, boolean isContinue) {
+        this.previewImg.setIcon(new ImageIcon(selectedImg.getScaledInstance(this.previewImg.getWidth(),
+                this.previewImg.getHeight(), Image.SCALE_SMOOTH)));
+
+        if (!isContinue)
+            this.puzzlePanel.createPuzzle(selectedImg);
         
-        this.previewImg.setIcon(new ImageIcon(puzzleImg));
-        this.previewImg.setToolTipText("<html><img src='file:" + imgFile.getAbsolutePath() + "' width='" + (selectedImg.getWidth() / 2)
-                + "' height='" + (selectedImg.getHeight() / 2) + "'></html>");
         this.updatePanel(this.gamePanel);
         this.createTimerTask();
     }
@@ -472,6 +567,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPanel northView;
     private javax.swing.JLabel previewImg;
     private view.Puzzle puzzlePanel;
+    private javax.swing.JButton saveBtn;
     private javax.swing.JLabel time;
     private javax.swing.JLabel timeLabel;
     private javax.swing.JLabel timerExplain;
