@@ -38,6 +38,29 @@ public class Puzzle extends JPanel {
         this.convertImgToMatrix(img);
     }
     
+    public BufferedImage createPuzzle(int currentRow, int currentColumn, int[][] matrix, int[][] originalMatrix) {
+        this.currentRow = currentRow;
+        this.currentColumn = currentColumn;
+        this.matrix = matrix;
+        this.originalMatrix = originalMatrix;
+        
+        this.width = this.matrix[0].length;
+        this.height = this.matrix.length;
+        
+       this.img = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_ARGB);
+       BufferedImage originalImg = new BufferedImage(this.width, this.height, BufferedImage.TYPE_INT_ARGB);
+        
+        // transform a number to a img point color
+        for (int i = 0; i < this.height; i++) {
+            for (int j = 0; j < this.width; j++) {
+                this.img.setRGB(j, i, this.matrix[i][j]);
+                originalImg.setRGB(j, i, this.originalMatrix[i][j]);
+            }
+        }        
+        
+        return originalImg;
+    }
+    
     private void divideImage() {
         while(this.width % this.TOTAL_COLUMN != 0 || this.height % this.TOTAL_ROW != 0) {
             if(this.width % this.TOTAL_COLUMN != 0)
@@ -62,20 +85,35 @@ public class Puzzle extends JPanel {
         for (int i = 0; i < this.height; ++i) {
             for (int j = 0; j < this.width; ++j) {
                 this.matrix[i][j] = colorsImg[this.width * i + j]; // Mapeo de índice del arreglo unidimensional al bidimensional.
+                this.originalMatrix[i][j] = this.matrix[i][j];
 
                 if (i < WIDTH_CHUNK && j < HEIGHT_CHUNK)
                     this.matrix[i][j] = -1; // white pixel
-                    
-                this.originalMatrix[i][j] = this.matrix[i][j];
             }
         }
-
+        
         this.doRandomMovements();
         this.convertMatrixToArray();
     }
 
     public BufferedImage getImg() {
         return img;
+    }
+    
+    public int[][] getMatrix() {
+        return matrix;
+    }
+
+    public int[][] getOriginalMatrix() {
+        return originalMatrix;
+    }
+
+    public int getCurrentRow() {
+        return currentRow;
+    }
+
+    public int getCurrentColumn() {
+        return currentColumn;
     }
     
     private void doRandomMovements() {
@@ -165,17 +203,31 @@ public class Puzzle extends JPanel {
     }
     
     public void reset() {
-        for (int i = 0; i < this.originalMatrix.length; i++)
-            System.arraycopy(this.originalMatrix[i], 0, this.matrix[i], 0, this.originalMatrix[i].length);
+        final int WIDTH_CHUNK = this.height / this.TOTAL_ROW;
+        final int HEIGHT_CHUNK = this.width / this.TOTAL_COLUMN;
+        
+        for (int i = 0; i < this.originalMatrix.length; i++) {
+            for (int j = 0; j < this.originalMatrix[i].length; j++) {
+                if(i < WIDTH_CHUNK && j < HEIGHT_CHUNK)
+                    this.matrix[i][j] = -1;
+                else
+                    this.matrix[i][j] = this.originalMatrix[i][j];
+            }
+        }
         
         this.doRandomMovements();
         this.convertMatrixToArray();
     }
     
     public boolean hasWon() {
+        final int WIDTH_CHUNK = this.height / this.TOTAL_ROW;
+        final int HEIGHT_CHUNK = this.width / this.TOTAL_COLUMN;
+        
         for (int i = 0; i < this.matrix.length; i++) {
             for (int j = 0; j < this.matrix[i].length; j++) {
-                if(this.matrix[i][j] != this.originalMatrix[i][j])
+                if(i < WIDTH_CHUNK && j < HEIGHT_CHUNK && this.matrix[i][j] != -1)
+                    return false;
+                else if(i >= WIDTH_CHUNK && j >= HEIGHT_CHUNK && this.matrix[i][j] != this.originalMatrix[i][j])
                     return false;
             }
         }
@@ -188,7 +240,7 @@ public class Puzzle extends JPanel {
 
         // Variable para seguir la posición en el array unidimensional
         int posicion = 0;
-
+        
         // Copiar cada fila de la matriz al array
         for (int[] m : this.matrix) {
             System.arraycopy(m, 0, array, posicion, m.length);
