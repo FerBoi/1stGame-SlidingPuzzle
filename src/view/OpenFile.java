@@ -20,7 +20,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  * @author Fernando GJ
  */
 public class OpenFile extends javax.swing.JDialog {
-    private File imgFile;
     private BufferedImage imgSelected;
 
     /** Creates new form OpenFile */
@@ -115,7 +114,7 @@ public class OpenFile extends javax.swing.JDialog {
         
         if(returnValue == JFileChooser.APPROVE_OPTION) {
             try {
-                this.imgFile = fileChooser.getSelectedFile();
+                File imgFile = fileChooser.getSelectedFile();
                 this.imgSelected = ImageIO.read(imgFile);
                 
                 if (this.imgSelected.getWidth() >= 400 && this.imgSelected.getHeight() >= 400) {
@@ -138,7 +137,7 @@ public class OpenFile extends javax.swing.JDialog {
         this.dispose();
         
         MainWindow mainWindow = (MainWindow) this.getParent();
-        mainWindow.createPuzzle(this.imgFile, new ImageIcon(this.imgFile.getAbsolutePath()).getImage(), this.imgSelected);
+        mainWindow.createPuzzle(this.imgSelected, false);
     }//GEN-LAST:event_startGameBtnActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
