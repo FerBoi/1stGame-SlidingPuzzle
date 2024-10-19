@@ -10,6 +10,8 @@ import java.awt.GridBagConstraints;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.IOException;
 import java.util.TimerTask;
@@ -33,6 +35,8 @@ public class MainWindow extends javax.swing.JFrame {
     private int seconds;
     private boolean timerPause;
     private int totalMovsDone;
+    
+    public static BufferedImage img;
     
     /** Creates new form MainWindow */
     public MainWindow() {
@@ -61,6 +65,8 @@ public class MainWindow extends javax.swing.JFrame {
         movementsLabel = new javax.swing.JLabel();
         previewImg = new javax.swing.JLabel();
         saveBtn = new javax.swing.JButton();
+        changePuzzleBtn = new javax.swing.JButton();
+        backBtnVGame = new javax.swing.JButton();
         leftPanel = new javax.swing.JPanel();
         instructionsPanel = new javax.swing.JPanel();
         labelUp = new javax.swing.JLabel();
@@ -69,6 +75,7 @@ public class MainWindow extends javax.swing.JFrame {
         labelBottom = new javax.swing.JLabel();
         inputWordMov = new javax.swing.JTextField();
         mvbLabel = new javax.swing.JLabel();
+        moveBtn = new javax.swing.JButton();
         puzzlePanel = new view.Puzzle();
         instructsPanel = new javax.swing.JPanel();
         northView = new javax.swing.JPanel();
@@ -97,10 +104,12 @@ public class MainWindow extends javax.swing.JFrame {
         time.setText("TIME:");
 
         timeLabel.setText("00:00:00");
+        timeLabel.setToolTipText("Current time");
 
         movements.setText("MOVEMENTS:");
 
         movementsLabel.setText("0");
+        movementsLabel.setToolTipText("Current movements");
 
         previewImg.setToolTipText("Click to maximize");
         previewImg.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -110,9 +119,28 @@ public class MainWindow extends javax.swing.JFrame {
         });
 
         saveBtn.setText("SAVE");
+        saveBtn.setToolTipText("Save the status of the current game");
         saveBtn.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 saveBtnActionPerformed(evt);
+            }
+        });
+
+        changePuzzleBtn.setText("CHANGE PUZZLE");
+        changePuzzleBtn.setToolTipText("Upload another puzzle");
+        changePuzzleBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                changePuzzleBtnActionPerformed(evt);
+            }
+        });
+
+        backBtnVGame.setIcon(new javax.swing.ImageIcon(getClass().getResource("/src/back.png"))); // NOI18N
+        backBtnVGame.setToolTipText("Go to the home screen");
+        backBtnVGame.setBorderPainted(false);
+        backBtnVGame.setFocusPainted(false);
+        backBtnVGame.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                backBtnVGameActionPerformed(evt);
             }
         });
 
@@ -121,29 +149,43 @@ public class MainWindow extends javax.swing.JFrame {
         northPanelLayout.setHorizontalGroup(
             northPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(northPanelLayout.createSequentialGroup()
-                .addContainerGap(38, Short.MAX_VALUE)
-                .addComponent(time)
-                .addGap(18, 18, 18)
-                .addComponent(timeLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 55, Short.MAX_VALUE)
-                .addComponent(movements)
-                .addGap(18, 18, 18)
-                .addComponent(movementsLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 134, Short.MAX_VALUE)
+                .addGroup(northPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(northPanelLayout.createSequentialGroup()
+                        .addContainerGap(30, Short.MAX_VALUE)
+                        .addComponent(time)
+                        .addGap(18, 18, 18)
+                        .addComponent(timeLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 47, Short.MAX_VALUE)
+                        .addComponent(movements)
+                        .addGap(18, 18, 18)
+                        .addComponent(movementsLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 122, Short.MAX_VALUE))
+                    .addGroup(northPanelLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(backBtnVGame)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addComponent(previewImg, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 101, Short.MAX_VALUE)
-                .addComponent(saveBtn)
-                .addContainerGap(63, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 125, Short.MAX_VALUE)
+                .addGroup(northPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(changePuzzleBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(saveBtn, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(17, Short.MAX_VALUE))
         );
         northPanelLayout.setVerticalGroup(
             northPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(northPanelLayout.createSequentialGroup()
-                .addGroup(northPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addContainerGap()
+                .addGroup(northPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(previewImg, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(northPanelLayout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(previewImg, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(northPanelLayout.createSequentialGroup()
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(northPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(northPanelLayout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(changePuzzleBtn)
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, northPanelLayout.createSequentialGroup()
+                                .addComponent(backBtnVGame)
+                                .addGap(18, 18, Short.MAX_VALUE)))
                         .addGroup(northPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(northPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                 .addComponent(time)
@@ -156,6 +198,8 @@ public class MainWindow extends javax.swing.JFrame {
 
         gamePanel.add(northPanel, java.awt.BorderLayout.PAGE_START);
 
+        instructionsPanel.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
+        instructionsPanel.setToolTipText("Game controls");
         instructionsPanel.setLayout(new javax.swing.BoxLayout(instructionsPanel, javax.swing.BoxLayout.Y_AXIS));
 
         labelUp.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -173,7 +217,8 @@ public class MainWindow extends javax.swing.JFrame {
         labelBottom.setText("BOTTOM - 's'");
         instructionsPanel.add(labelBottom);
 
-        inputWordMov.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED, new java.awt.Color(255, 0, 51), new java.awt.Color(255, 0, 51), null, null));
+        inputWordMov.setToolTipText("Insert your movement");
+        inputWordMov.setBorder(javax.swing.BorderFactory.createBevelBorder(javax.swing.border.BevelBorder.RAISED));
         inputWordMov.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 inputWordMovActionPerformed(evt);
@@ -183,39 +228,53 @@ public class MainWindow extends javax.swing.JFrame {
         mvbLabel.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         mvbLabel.setText("MOVEMENT");
 
+        moveBtn.setText("MOVE");
+        moveBtn.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                moveBtnActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout leftPanelLayout = new javax.swing.GroupLayout(leftPanel);
         leftPanel.setLayout(leftPanelLayout);
         leftPanelLayout.setHorizontalGroup(
             leftPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(leftPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(leftPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(inputWordMov)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, leftPanelLayout.createSequentialGroup()
+                .addGroup(leftPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(leftPanelLayout.createSequentialGroup()
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(moveBtn))
+                    .addGroup(leftPanelLayout.createSequentialGroup()
+                        .addContainerGap(10, Short.MAX_VALUE)
                         .addGroup(leftPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(instructionsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 74, Short.MAX_VALUE)
-                            .addComponent(mvbLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addContainerGap())))
+                            .addComponent(instructionsPanel, javax.swing.GroupLayout.DEFAULT_SIZE, 88, Short.MAX_VALUE)
+                            .addComponent(mvbLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 88, Short.MAX_VALUE)
+                            .addComponent(inputWordMov))))
+                .addContainerGap())
         );
         leftPanelLayout.setVerticalGroup(
             leftPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(leftPanelLayout.createSequentialGroup()
-                .addGap(18, 18, 18)
+                .addGap(19, 19, 19)
                 .addComponent(instructionsPanel, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 115, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 114, Short.MAX_VALUE)
                 .addComponent(mvbLabel)
-                .addGap(48, 48, 48)
+                .addGap(18, 18, Short.MAX_VALUE)
                 .addComponent(inputWordMov, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(32, 32, 32))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(moveBtn)
+                .addContainerGap(27, Short.MAX_VALUE))
         );
 
         gamePanel.add(leftPanel, java.awt.BorderLayout.LINE_END);
+
+        puzzlePanel.setToolTipText("Puzzle");
 
         javax.swing.GroupLayout puzzlePanelLayout = new javax.swing.GroupLayout(puzzlePanel);
         puzzlePanel.setLayout(puzzlePanelLayout);
         puzzlePanelLayout.setHorizontalGroup(
             puzzlePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 708, Short.MAX_VALUE)
+            .addGap(0, 690, Short.MAX_VALUE)
         );
         puzzlePanelLayout.setVerticalGroup(
             puzzlePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -240,6 +299,7 @@ public class MainWindow extends javax.swing.JFrame {
         imagePrevExplain.setText("- Image preview: It represents the puzzle image");
 
         backBtn.setIcon(new javax.swing.ImageIcon(getClass().getResource("/src/back.png"))); // NOI18N
+        backBtn.setToolTipText("Go to the home screen");
         backBtn.setBorder(null);
         backBtn.setBorderPainted(false);
         backBtn.addActionListener(new java.awt.event.ActionListener() {
@@ -346,50 +406,7 @@ public class MainWindow extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void inputWordMovActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_inputWordMovActionPerformed
-        if (this.inputWordMov.getText().length() == 1) {
-            char charPressed = this.inputWordMov.getText().charAt(0);
-
-            if (charPressed == 'w' || charPressed == 'a' || charPressed == 's' || charPressed == 'd') {
-                boolean moveDone = false;
-
-                switch (charPressed) {
-                    case 'w' ->
-                        moveDone = this.puzzlePanel.move(MoveDirection.UP);
-                    case 'd' ->
-                        moveDone = this.puzzlePanel.move(MoveDirection.RIGHT);
-                    case 'a' ->
-                        moveDone = this.puzzlePanel.move(MoveDirection.LEFT);
-                    case 's' ->
-                        moveDone = this.puzzlePanel.move(MoveDirection.DOWN);
-                }
-
-                if (!moveDone) {
-                    this.timerPause = true;
-                    JOptionPane.showConfirmDialog(this, "Invalid move!", "ERROR",
-                            JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
-                    this.timerPause = false;
-                } else {
-                    if (this.puzzlePanel.hasWon()) {
-                        this.timer.cancel();
-
-                        if (JOptionPane.showConfirmDialog(this, "You have won! ¿Reset?", "CONGRATS",
-                                JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE) == JOptionPane.YES_OPTION) {
-                            this.puzzlePanel.reset();
-                            this.seconds = 0;
-                            this.createTimerTask();
-                        }
-                    } else
-                        this.movementsLabel.setText(++this.totalMovsDone + "");
-                }
-            }
-        } else {
-            this.timerPause = true;
-            JOptionPane.showConfirmDialog(this, "Please, insert any valid letter", "ERROR",
-                    JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
-            this.timerPause = false;
-        }
-        
-        this.inputWordMov.setText("");
+        this.move();
     }//GEN-LAST:event_inputWordMovActionPerformed
 
     private void backBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backBtnActionPerformed
@@ -398,49 +415,100 @@ public class MainWindow extends javax.swing.JFrame {
 
     private void saveBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveBtnActionPerformed
         this.timerPause = true;
-        int answer = JOptionPane.showConfirmDialog(this, "This will save your progress and exit the current game. Do you agree?", "SAVING GAME", 
+        int answer = JOptionPane.showConfirmDialog(this, "This will save your progress and exit the current game. Do you agree?", "SAVING GAME",
                 JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
-        
-        if(answer == JOptionPane.YES_OPTION) {
-            JFileChooser saveCurrentGame = new JFileChooser(".");
+
+        if (answer == JOptionPane.YES_OPTION) {
+            JFileChooser saveCurrentGame = new JFileChooser(".") {
+                @Override
+                public void approveSelection() {
+                    File file = getSelectedFile();
+
+                    if (file.exists()) {
+                        int option = JOptionPane.showConfirmDialog(this, "This is going to override the exists file, Continue?",
+                                "WARNING", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+
+                        if (option == JOptionPane.YES_OPTION) 
+                            super.approveSelection();
+                    } else
+                        super.approveSelection();
+                }
+            };
+
+            saveCurrentGame.setAcceptAllFileFilterUsed(false);
+            saveCurrentGame.setFileFilter(new FileNameExtensionFilter("Sliding Puzzle (*.sli)", "sli"));
             saveCurrentGame.setDialogTitle("Save current game");
-            
+
             int userSelection = saveCurrentGame.showSaveDialog(this);
-            
-            if(userSelection == JFileChooser.APPROVE_OPTION) {
+
+            if (userSelection == JFileChooser.APPROVE_OPTION) {
+                File fileToWrite = saveCurrentGame.getSelectedFile();
+
+                if (!fileToWrite.getName().endsWith(".sli"))
+                    fileToWrite = new File(fileToWrite.getAbsolutePath() + ".sli");
+
                 try {
-                    File fileToWrite = saveCurrentGame.getSelectedFile();
-                    
-                    if (!fileToWrite.getName().endsWith(".sli"))
-                        fileToWrite = new File(fileToWrite.getAbsolutePath() + ".sli");
-                    
                     fileToWrite.createNewFile();
-                    int[] otherData = {this.seconds, this.totalMovsDone, this.puzzlePanel.getCurrentRow(), this.puzzlePanel.getCurrentColumn()};
-                    
-                    boolean saved = SliWriter.writeSliFile(otherData, this.puzzlePanel.getMatrix(), this.puzzlePanel.getOriginalMatrix(),
-                            fileToWrite);
-                    
-                    if(saved) {
-                        JOptionPane.showConfirmDialog(this, "Game saved!", "SUCCESS", JOptionPane.DEFAULT_OPTION,
-                                JOptionPane.INFORMATION_MESSAGE);
-                        this.updatePanel(this.gameOptionPanel);
-                    } else {
-                        JOptionPane.showConfirmDialog(this, "There was an error saving the game status", "ERROR", 
-                                JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
-                        this.timerPause = false;
-                    }
                 } catch (IOException ex) {
                     Logger.getLogger(MainWindow.class.getName()).log(Level.SEVERE, null, ex);
                 }
+                
+                int[] otherData = {this.seconds, this.totalMovsDone, this.puzzlePanel.getCURRENT_POSITION_WHITE_PIECE()[0], 
+                    this.puzzlePanel.getCURRENT_POSITION_WHITE_PIECE()[1]};
+
+                boolean saved = SliWriter.writeSliFile(otherData, this.puzzlePanel.getMatrix(), this.puzzlePanel.getOriginalMatrix(),
+                        fileToWrite);
+
+                if (saved) {
+                    JOptionPane.showConfirmDialog(this, "Game saved!", "SUCCESS", JOptionPane.DEFAULT_OPTION,
+                            JOptionPane.INFORMATION_MESSAGE);
+                    this.updatePanel(this.gameOptionPanel);
+                } else {
+                    JOptionPane.showConfirmDialog(this, "There was an error saving the game status", "ERROR",
+                            JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
+                    this.timerPause = false;
+                }
             } else
                 this.timerPause = false;
-        } else
-            this.timerPause = false;
+        }
     }//GEN-LAST:event_saveBtnActionPerformed
 
     private void previewImgMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_previewImgMouseReleased
-        // TODO a
+        MaximizeImg dialogImg = new MaximizeImg(this, true);
+        dialogImg.setLocationRelativeTo(null);
+        dialogImg.setVisible(true);
     }//GEN-LAST:event_previewImgMouseReleased
+
+    private void changePuzzleBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_changePuzzleBtnActionPerformed
+        this.timerPause = true;
+        int answer = JOptionPane.showConfirmDialog(this, "This will cancel your current game . Continue?", "STATUS COULD LOOSE", 
+                JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+        
+        if (answer == JOptionPane.YES_OPTION) {
+            OpenFile jDialogOpenFile = new OpenFile(this, true, true);
+            jDialogOpenFile.setLocationRelativeTo(null);
+            jDialogOpenFile.setVisible(true);
+        }
+
+        this.timerPause = false;
+    }//GEN-LAST:event_changePuzzleBtnActionPerformed
+
+    private void backBtnVGameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backBtnVGameActionPerformed
+        this.timerPause = true;
+        int answer = JOptionPane.showConfirmDialog(this, "This will cancel your current game. Continue?", "STATUS COULD LOOSE", 
+                JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE);
+        
+        if(answer == JOptionPane.YES_OPTION) {
+            this.timer.cancel();
+            this.updatePanel(this.gameOptionPanel);
+        } else
+            this.timerPause = false;
+        
+    }//GEN-LAST:event_backBtnVGameActionPerformed
+
+    private void moveBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_moveBtnActionPerformed
+        this.move();
+    }//GEN-LAST:event_moveBtnActionPerformed
 
     private void updatePanel(JPanel newPanel) {
         this.cardPanel.removeAll();
@@ -469,7 +537,7 @@ public class MainWindow extends javax.swing.JFrame {
             btns[i].addActionListener(e -> {
                 switch (forLambda) {
                     case 0 -> {
-                        OpenFile jDialogOpenFile = new OpenFile(this, true);
+                        OpenFile jDialogOpenFile = new OpenFile(this, true, false);
                         jDialogOpenFile.setLocationRelativeTo(null);
                         jDialogOpenFile.setVisible(true);
                     } 
@@ -485,14 +553,14 @@ public class MainWindow extends javax.swing.JFrame {
                             if(data != null) {
                                 this.seconds = (int) data[0];
                                 this.totalMovsDone = (int) data[1];
-                                BufferedImage puzzleImg = this.puzzlePanel.createPuzzle((int) data[2], (int) data[3], (int[][]) data[4], (int[][]) data[5]);
+                                img = this.puzzlePanel.createPuzzle((int) data[2], (int) data[3], (int[][]) data[4], (int[][]) data[5]);
                                 
                                 this.movementsLabel.setText(this.totalMovsDone + "");
                                 
                                 if(this.timer != null)
                                     this.timer.cancel();
                                 
-                                this.createPuzzle(puzzleImg, true);
+                                this.createPuzzle(img, true);
                             }
                         }
                     }
@@ -532,17 +600,80 @@ public class MainWindow extends javax.swing.JFrame {
     public void createPuzzle(BufferedImage selectedImg, boolean isContinue) {
         this.previewImg.setIcon(new ImageIcon(selectedImg.getScaledInstance(this.previewImg.getWidth(),
                 this.previewImg.getHeight(), Image.SCALE_SMOOTH)));
-
-        if (!isContinue)
+        
+        ColorModel cm = selectedImg.getColorModel();
+        boolean isAlphaPremultiplied = cm.isAlphaPremultiplied();
+        WritableRaster raster = selectedImg.copyData(null);
+        img = new BufferedImage(cm, raster, isAlphaPremultiplied, null);
+        
+        if (!isContinue) {
+            this.seconds = 0;
+            this.totalMovsDone = 0;
+            this.movementsLabel.setText(this.totalMovsDone + "");
             this.puzzlePanel.createPuzzle(selectedImg);
+        }
         
         this.updatePanel(this.gamePanel);
         this.createTimerTask();
     }
 
+    public Timer getTimer() {
+        return timer;
+    }
+    
+    private void move() {
+        if (this.inputWordMov.getText().length() == 1) {
+            char charPressed = this.inputWordMov.getText().charAt(0);
+
+            if (charPressed == 'w' || charPressed == 'a' || charPressed == 's' || charPressed == 'd') {
+                boolean moveDone = false;
+
+                switch (charPressed) {
+                    case 'w' ->
+                        moveDone = this.puzzlePanel.move(MoveDirection.UP);
+                    case 'd' ->
+                        moveDone = this.puzzlePanel.move(MoveDirection.RIGHT);
+                    case 'a' ->
+                        moveDone = this.puzzlePanel.move(MoveDirection.LEFT);
+                    case 's' ->
+                        moveDone = this.puzzlePanel.move(MoveDirection.DOWN);
+                }
+
+                if (!moveDone) {
+                    this.timerPause = true;
+                    JOptionPane.showConfirmDialog(this, "Invalid move!", "ERROR",
+                            JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
+                    this.timerPause = false;
+                } else {
+                    if (this.puzzlePanel.hasWon()) {
+                        this.timer.cancel();
+
+                        if (JOptionPane.showConfirmDialog(this, "You have won! ¿Reset?", "CONGRATS",
+                                JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE) == JOptionPane.YES_OPTION) {
+                            this.puzzlePanel.reset();
+                            this.seconds = 0;
+                            this.createTimerTask();
+                        }
+                    } else {
+                        this.movementsLabel.setText(++this.totalMovsDone + "");
+                    }
+                }
+            }
+        } else {
+            this.timerPause = true;
+            JOptionPane.showConfirmDialog(this, "Please, insert any valid letter", "ERROR",
+                    JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE);
+            this.timerPause = false;
+        }
+
+        this.inputWordMov.setText("");
+    }
+   
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton backBtn;
+    private javax.swing.JButton backBtnVGame;
     private javax.swing.JPanel cardPanel;
+    private javax.swing.JButton changePuzzleBtn;
     private javax.swing.JLabel constrolsExplain;
     private javax.swing.JLabel counterExplain;
     private javax.swing.JLabel counterExplain1;
@@ -560,6 +691,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JPanel leftPanel;
     private javax.swing.JLabel movInput;
     private javax.swing.JLabel movInput1;
+    private javax.swing.JButton moveBtn;
     private javax.swing.JLabel movements;
     private javax.swing.JLabel movementsLabel;
     private javax.swing.JLabel mvbLabel;
@@ -574,5 +706,7 @@ public class MainWindow extends javax.swing.JFrame {
     private javax.swing.JLabel titleEastView;
     private javax.swing.JLabel titleNorthView;
     // End of variables declaration//GEN-END:variables
+
+
 
 } // end MainWindow
