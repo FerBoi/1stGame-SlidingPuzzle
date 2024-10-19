@@ -222,14 +222,14 @@ public class Puzzle extends JPanel {
 
             if (oldDirection == null) {
                 oldDirection = currentDirection;
-                this.move(currentDirection);
+                this.move(currentDirection, false);
                 i++;
             } else if ((oldDirection == MoveDirection.UP && currentDirection != MoveDirection.DOWN) || (oldDirection == MoveDirection.DOWN
                     && currentDirection != MoveDirection.UP) || (oldDirection == MoveDirection.LEFT && currentDirection != MoveDirection.RIGHT)
                     || (oldDirection == MoveDirection.RIGHT && currentDirection != MoveDirection.LEFT)) {
                 oldDirection = currentDirection;
 
-                if (this.move(currentDirection))
+                if (this.move(currentDirection, false))
                     i++;
                 else
                     invalidNumber = number;
@@ -242,9 +242,11 @@ public class Puzzle extends JPanel {
      * Updates the position of the white piece and swaps it with the adjacent
      * piece.
      * @param direction - The direction in which to move the white piece
+     * @param movedByUser - Indicates whether the move is made by the user or automatically by the CPU
+     * @see Puzzle#convertMatrixToArray() 
      * @return true if the move was successful, false otherwise
      */
-    public boolean move(MoveDirection direction) {
+    public boolean move(MoveDirection direction, boolean movedByUser) {
         if ((direction == MoveDirection.UP && CURRENT_POSITION_WHITE_PIECE[0] - 1 < 0) || (direction == MoveDirection.DOWN && CURRENT_POSITION_WHITE_PIECE[0] + 1 > TOTAL_ROW - 1)
                 || (direction == MoveDirection.LEFT && CURRENT_POSITION_WHITE_PIECE[1] - 1 < 0) || (direction == MoveDirection.RIGHT && CURRENT_POSITION_WHITE_PIECE[1] + 1 > TOTAL_ROW - 1)) {
             return false;
@@ -277,6 +279,8 @@ public class Puzzle extends JPanel {
             }
         }
         
+        if(movedByUser)
+            this.convertMatrixToArray();
         return true;
     }
     
