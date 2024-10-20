@@ -34,11 +34,11 @@ public class Puzzle extends JPanel {
     /**
      * Total number of rows the puzzle must have
      */
-    private final static int TOTAL_ROW = 4;
+    private final static int TOTAL_ROW = 2;
     /**
      * Total number of column the puzzle must have
      */
-    private final static int TOTAL_COLUMN = 4;
+    private final static int TOTAL_COLUMN = 2;
     /**
      * Variable that represents the position of the white piece (row, column)
      */
@@ -312,11 +312,9 @@ public class Puzzle extends JPanel {
     public boolean hasWon() {
         for (int i = 0; i < this.matrix.length; i++) {
             for (int j = 0; j < this.matrix[i].length; j++) {
-                // Check if the positions of the white piece are correct
-                if(i < CHUNK_DIMENSIONS.width && j < CHUNK_DIMENSIONS.height && this.matrix[i][j] != -1)
-                    return false;
-                // Check if the positions of the other pieces match the original
-                else if(i >= CHUNK_DIMENSIONS.width && j >= CHUNK_DIMENSIONS.height && this.matrix[i][j] != imgProvidedMatrix[i][j])
+                // Check if the positions of the white piece are correct or if the positions of the other pieces match the original
+                if((i < CHUNK_DIMENSIONS.width && j < CHUNK_DIMENSIONS.height && this.matrix[i][j] != -1) || 
+                        (i >= CHUNK_DIMENSIONS.width && j >= CHUNK_DIMENSIONS.height && this.matrix[i][j] != imgProvidedMatrix[i][j]))
                     return false;
             }
         }
