@@ -630,13 +630,13 @@ public class MainWindow extends javax.swing.JFrame {
 
                 switch (charPressed) {
                     case 'w' ->
-                        moveDone = this.puzzlePanel.move(MoveDirection.UP);
+                        moveDone = this.puzzlePanel.move(MoveDirection.UP, true);
                     case 'd' ->
-                        moveDone = this.puzzlePanel.move(MoveDirection.RIGHT);
+                        moveDone = this.puzzlePanel.move(MoveDirection.RIGHT, true);
                     case 'a' ->
-                        moveDone = this.puzzlePanel.move(MoveDirection.LEFT);
+                        moveDone = this.puzzlePanel.move(MoveDirection.LEFT, true);
                     case 's' ->
-                        moveDone = this.puzzlePanel.move(MoveDirection.DOWN);
+                        moveDone = this.puzzlePanel.move(MoveDirection.DOWN, true);
                 }
 
                 if (!moveDone) {
