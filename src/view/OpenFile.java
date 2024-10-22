@@ -5,6 +5,7 @@
 
 package view;
 
+import java.awt.Frame;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -21,11 +22,14 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  */
 public class OpenFile extends javax.swing.JDialog {
     private BufferedImage imgSelected;
+    private final boolean OPENED_IN_GAME;
 
     /** Creates new form OpenFile */
-    public OpenFile(java.awt.Frame parent, boolean modal) {
+    public OpenFile(Frame parent, boolean modal, boolean openedInGame) {
         super(parent, modal);
         initComponents();
+        
+        this.OPENED_IN_GAME = openedInGame;
     }
 
     /** This method is called from within the constructor to
@@ -117,6 +121,9 @@ public class OpenFile extends javax.swing.JDialog {
                 File imgFile = fileChooser.getSelectedFile();
                 this.imgSelected = ImageIO.read(imgFile);
                 
+                if(this.imgSelected == null)
+                    throw new IOException();
+                
                 if (this.imgSelected.getWidth() >= 400 && this.imgSelected.getHeight() >= 400) {
                     Image resizedImage = new ImageIcon(imgFile.getAbsolutePath()).getImage().getScaledInstance(this.previewImg.getWidth(),
                             this.previewImg.getHeight(), Image.SCALE_SMOOTH);
@@ -135,8 +142,11 @@ public class OpenFile extends javax.swing.JDialog {
 
     private void startGameBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startGameBtnActionPerformed
         this.dispose();
-        
+       
         MainWindow mainWindow = (MainWindow) this.getParent();
+        
+        if(this.OPENED_IN_GAME)
+            mainWindow.getTimer().cancel();
         mainWindow.createPuzzle(this.imgSelected, false);
     }//GEN-LAST:event_startGameBtnActionPerformed
 
